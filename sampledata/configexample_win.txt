@@ -1,0 +1,5 @@
+trainingDir=C:\Users\monso\code\aurelien\ssvm\sampledata\testdata\imagesLeft_35-199_top\
+maskTrainingDir=C:\Users\monso\code\aurelien\ssvm\sampledata\testdata\masksLeft_35-199_top\
+testDir=C:\Users\monso\code\aurelien\ssvm\sampledata\testdata\imagesLeft_35-199_bottom\
+maskTestDir=C:\Users\monso\code\aurelien\ssvm\sampledata\testdata\masksLeft_35-199_bottom\
+

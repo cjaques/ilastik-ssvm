@@ -1,0 +1,251 @@
+cmake_policy(SET CMP0011 NEW)
+cmake_policy(SET CMP0012 NEW)
+#cmake_policy(SET CMP0003 NEW)
+
+INCLUDE_REGULAR_EXPRESSION("^.*$")
+
+EXECUTE_PROCESS(
+COMMAND "hostname"
+OUTPUT_VARIABLE hostname
+ERROR_VARIABLE hostname
+)
+
+# set(CMAKE_C_COMPILER "gcc-5")
+# set(CMAKE_CXX_COMPILER "g++-5") # clang-omp instead of g++... other compile errs
+
+SET(CMAKE_BUILD_TYPE Release)
+#SET(CMAKE_BUILD_TYPE Debug)
+
+#SET(EXECUTABLE_OUTPUT_PATH "~/bin/EM_auto_step/")
+
+option(USE_ITK "use ITK library" on)
+mark_as_advanced(USE_ITK)
+option(USE_LIBDAI "use libdai library" on)
+mark_as_advanced(USE_LIBDAI)
+option(USE_MRF "use MRF library" off)
+mark_as_advanced(USE_MRF)
+option(USE_MAXFLOW "use maxflow library" on)
+mark_as_advanced(USE_MAXFLOW)
+option(USE_MULTIOBJ "use multiobj library" on)
+mark_as_advanced(USE_MULTIOBJ)
+option(USE_RAYS3D "use 3d rays library" off)
+mark_as_advanced(USE_RAYS3D)
+
+if(WIN32)
+    message(WARNING "WIN32 architecture")
+    SET(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /w /Zi /EHsc /GR /MP /openmp ")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /D_AMD64_ ")
+elseif(APPLE)
+    set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -g -pg -largp") #TODO CHris - virer ce vilain -largp qui ne sert que pour UN fichier
+    set(CMAKE_CXX_FLAGS_DEBUG   "")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+elseif(UNIX)
+    set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS}")
+    set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -g -pg")
+    set(CMAKE_CXX_FLAGS_DEBUG   "")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+else()
+    message(WARNING "unrecognized architecture")
+endif()
+
+set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -D USE_REVERSE_INDEXING -std=c++0x")
+
+if(WIN32)
+    set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -D WITH_PNG -D WITH_OPENMP /openmp")
+else()
+    set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -D WITH_PNG -D WITH_OPENMP")
+#set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS} -std=c++0x -std=gnu++0x")
+endif()
+
+if(USE_ITK)
+  set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS}   -D USE_ITK")
+  set(ITK_DIR "/usr/local/bin/itk/InsightToolkit/4.8.0/ITKbin/" CACHE PATH "ITK build directory") #Remove hard link
+  message("ITK_AUX_DIR: ${ITK_AUX_DIR} ITK_DIR: ${ITK_DIR}")
+  set(ITK_AUX_DIR "${SLICEME_DIR}/lib/auxItk/" CACHE PATH "ITK auxiliar headers directory")
+  find_package(ITK REQUIRED)
+  IF(ITK_FOUND)
+    INCLUDE(${ITK_USE_FILE})
+  ELSE(ITK_FOUND)
+    message("itk not found")
+  ENDIF(ITK_FOUND)
+  include_directories(${ITK_AUX_DIR})
+  message("ITK libraries : ${ITK_LIBRARIES} ")
+endif(USE_ITK)
+
+
+if(USE_RAYS3D)
+set(CMAKE_CXX_FLAGS         "${CMAKE_CXX_FLAGS}   -D USE_RAYS3D -D RAYS_MULTITHREADING")
+endif(USE_RAYS3D)
+
+###################################################################### PACKAGES
+
+set(OpenCV_DIR "/user/local/lib/" CACHE PATH "OpenCV root dir") #/usr/local/include/opencv/
+
+FIND_PACKAGE(OpenCV REQUIRED)
+
+include_directories(${OpenCV_INCLUDE_DIRS})
+message(STATUS ${OpenCV_INCLUDE_DIRS})
+#find_library(ML_LIBRARY NAMES opencv_ml PATHS ${OpenCV_DIR}/lib/)
+#find_library(ML_LIBRARY NAMES ml PATHS ${OpenCV_DIR}/lib/)
+#SET(OpenCV_LIBS ${OpenCV_LIBS} ${ML_LIBRARY})
+message("OpenCV")
+message(STATUS ${OpenCV_LIBS})
+message(STATUS ${OpenCV_LIBRARIES})
+SET(OpenCV_LIBS ${OpenCV_LIBRARIES})
+
+#Superpixel library
+find_library(SUPERPIXEL_LIBRARY NAMES supervoxel PATHS ${SLICEME_DIR}/lib/slic/)
+
+# 3d rays
+if(USE_RAYS3D)
+find_library(RAYS3D_LIBRARY NAMES rays3d PATHS ${SLICEME_DIR}/lib/rays3d/)
+find_package(ITK REQUIRED)
+endif(USE_RAYS3D)
+
+###################################################################### INCLUDES
+
+# include directories
+include_directories(${SLICEME_DIR}/core/)
+
+# superpixel/supervoxel library
+include_directories(${SLICEME_DIR}/lib/slic/)
+
+# libsvm
+#include_directories(${SLICEME_DIR}/lib/libsvm-3.0)
+
+# 3d rays
+if(USE_RAYS3D)
+include_directories(${SLICEME_DIR}/lib/rays3d)
+endif(USE_RAYS3D)
+
+# libDAI
+if(USE_LIBDAI)
+set(LIBDAI_INCLUDE_DIRS ${SLICEME_DIR}/lib/libDAI024/include/ CACHE PATH "libdai include dir")
+include_directories(${LIBDAI_INCLUDE_DIRS})
+find_library(LIBDAI_LIBRARY NAMES dai PATHS "${SLICEME_DIR}/lib/libDAI024/build/"
+                                            "${SLICEME_DIR}/lib/libDAI024/lib/"
+                                            "${SLICEME_DIR}/lib/libDAI024/build/Release/"
+                                            "${SLICEME_DIR}/lib/libDAI024/Release/")
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D USE_LIBDAI")
+endif(USE_LIBDAI)
+
+# MRF
+if(USE_MRF)
+include_directories(${SLICEME_DIR}/lib/MRF2.1/)
+find_library(MRF_LIBRARY NAMES MRF PATHS ${SLICEME_DIR}/lib/MRF2.1/)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D USE_MRF")
+endif(USE_MRF)
+
+# maxflow
+if(USE_MAXFLOW)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D USE_MAXFLOW")
+include_directories(${SLICEME_DIR}/lib/graphCuts/)
+endif(USE_MAXFLOW)
+
+#multiobj
+if(USE_MULTIOBJ)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -D USE_MULTIOBJ")
+endif(USE_MULTIOBJ)
+
+####################################################################### OPTIONS
+
+set(CMAKE_CXX_FLAGS_DEBUG   "${CMAKE_CXX_FLAGS} -g -pg")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS} -O3")
+
+set(CMAKE_C_FLAGS         ${CMAKE_CXX_FLAGS})
+set(CMAKE_C_FLAGS_DEBUG   ${CMAKE_CXX_FLAGS_DEBUG})
+set(CMAKE_C_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+
+# To get linker to work with older libs (boost/itk) and to include argp
+set(LINK_FLAGS "-stdlib=libstdc++ -largp") # CHRIS - this is apparently not used...
+
+######################################################################### FILES
+
+set(SLICEME_FILES
+${SLICEME_DIR}/core/colormap.cpp
+${SLICEME_DIR}/core/Config.cpp
+${SLICEME_DIR}/core/Feature.cpp
+${SLICEME_DIR}/core/F_Bias.cpp
+${SLICEME_DIR}/core/F_ColorHistogram.cpp
+${SLICEME_DIR}/core/F_Combo.cpp
+${SLICEME_DIR}/core/F_Gaussian.cpp
+${SLICEME_DIR}/core/F_Glcm.cpp
+${SLICEME_DIR}/core/F_Histogram.cpp
+${SLICEME_DIR}/core/F_LoadFromFile.cpp
+${SLICEME_DIR}/core/F_OrientedHistogram.cpp
+${SLICEME_DIR}/core/F_Position.cpp
+${SLICEME_DIR}/core/F_Precomputed.cpp
+${SLICEME_DIR}/core/Histogram.cpp
+${SLICEME_DIR}/core/oSVM.cpp
+${SLICEME_DIR}/core/Slice3d.cpp
+${SLICEME_DIR}/core/Slice.cpp
+${SLICEME_DIR}/core/Slice_P.cpp
+${SLICEME_DIR}/core/Supernode.cpp
+${SLICEME_DIR}/core/StatModel.cpp
+${SLICEME_DIR}/core/utils.cpp
+${SLICEME_DIR}/core/svm_struct/svm_struct_common.c
+${SLICEME_DIR}/core/svm_struct/svm_struct_learn.c
+${SLICEME_DIR}/core/svm_light/svm_common.c
+${SLICEME_DIR}/core/svm_light/svm_hideo.c
+${SLICEME_DIR}/core/svm_light/svm_learn.c
+${SLICEME_DIR}/core/svm_struct_api.c
+${SLICEME_DIR}/core/svm_struct_learn_custom.c
+${SLICEME_DIR}/core/constraint_set.cpp
+${SLICEME_DIR}/core/label_cache.cpp
+${SLICEME_DIR}/core/inference_globals.cpp
+${SLICEME_DIR}/core/energyParam.cpp
+${SLICEME_DIR}/core/inference.cpp
+${SLICEME_DIR}/core/graphInference.cpp
+${SLICEME_DIR}/core/gi_ICM.cpp
+${SLICEME_DIR}/core/gi_max.cpp
+${SLICEME_DIR}/core/gi_MF.cpp
+${SLICEME_DIR}/core/gi_sampling.cpp
+)
+
+if(USE_LIBDAI)
+set(SLICEME_FILES ${SLICEME_FILES} ${SLICEME_DIR}/core/gi_libDAI.cpp)
+set(INFERENCE_THIRD_PARTY_LIBRARIES ${INFERENCE_THIRD_PARTY_LIBRARIES} ${LIBDAI_LIBRARY})
+endif(USE_LIBDAI)
+
+if(USE_MRF)
+set(SLICEME_FILES ${SLICEME_FILES} ${SLICEME_DIR}/core/gi_MRF.cpp)
+set(INFERENCE_THIRD_PARTY_LIBRARIES ${INFERENCE_THIRD_PARTY_LIBRARIES} ${MRF_LIBRARY})
+endif(USE_MRF)
+
+if(USE_MAXFLOW)
+set(SLICEME_FILES ${SLICEME_FILES} ${SLICEME_DIR}/core/gi_maxflow.cpp)
+endif(USE_MAXFLOW)
+
+if(USE_MULTIOBJ)
+set(SLICEME_FILES ${SLICEME_FILES} ${SLICEME_DIR}/core/gi_multiobject.cpp)
+endif(USE_MULTIOBJ)
+
+if(USE_RAYS3D)
+set(SLICEME_FILES ${SLICEME_FILES} ${SLICEME_DIR}/core/F_3dRays.cpp)
+endif(USE_RAYS3D)
+
+if(USE_ITK)
+set(SLICEME_FILES ${SLICEME_FILES}
+${SLICEME_DIR}/core/F_Filter.cpp
+${SLICEME_DIR}/core/F_GradientStats.cpp)
+endif(USE_ITK)
+
+##################################################################### LIBRARIES
+
+set(SLICEME_THIRD_PARTY_LIBRARIES ${OpenCV_LIBRARIES} ${SUPERPIXEL_LIBRARY} ${INFERENCE_THIRD_PARTY_LIBRARIES})
+find_package(Boost 1.58.0 COMPONENTS program_options REQUIRED) # Boost 1.37
+include_directories(${Boost_INCLUDE_DIRS})
+
+find_package(ZLIB REQUIRED)
+include_directories(${ZLIB_INCLUDE_DIRS})
+set(SLICEME_THIRD_PARTY_LIBRARIES ${SLICEME_THIRD_PARTY_LIBRARIES} ${ZLIB_LIBRARIES})
+
+if(USE_ITK)
+set(SLICEME_THIRD_PARTY_LIBRARIES ${SLICEME_THIRD_PARTY_LIBRARIES} ${ITK_LIBRARIES})  # ITKIO
+endif(USE_ITK)
+
+if(USE_RAYS3D)
+set(SLICEME_THIRD_PARTY_LIBRARIES ${SLICEME_THIRD_PARTY_LIBRARIES} ${RAYS3D_LIBRARY})
+endif(USE_RAYS3D)

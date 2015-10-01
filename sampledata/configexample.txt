@@ -1,0 +1,4 @@
+trainingDir=/Users/Chris/Code/ssvm/sampledata/testdata/imagesLeft_35-199_top/
+maskTrainingDir=/Users/Chris/Code/ssvm/sampledata/testdata/masksLeft_35-199_top/
+testDir=/Users/Chris/Code/ssvm/sampledata/testdata/imagesLeft_35-199_bottom/
+maskTestDir=/Users/Chris/Code/ssvm/sampledata/testdata/masksLeft_35-199_bottom/
