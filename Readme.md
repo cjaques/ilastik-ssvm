@@ -1,3 +1,10 @@
+This code is based on Aurelien Lucchi code, SSVM.
+It has been adapted to compile on MACOSX with CLANG.
+
+Things are not all set yet. 
+Any comment/remark is welcome --> christian.jaques@gmail.com
+
+
 cd ~Code structure
 ==============
 * core contains the core classes
@@ -10,7 +17,7 @@ Dependencies
 ============
 * opencv-dev
 * libsvm (modified to be multi-thread)
-* ITK 3.20.1(install with review flag ON)
+* ITK 4.8.X (install with review flag ON)
 * freeglut3-dev libglew1.5-dev libxmu-dev
 * sudo apt-get install g++ make cmake doxygen graphviz libboost-dev libboost-graph-dev libboost-program-options-dev
 * gnuplot
@@ -29,7 +36,7 @@ Sources
 
 clone with
 
-`git clone https://git.epfl.ch/repo/ssvm.git`
+`git clone https://github.com/elPhasmoLoco/ilastik-ssvm 
 
 Install :
 
@@ -38,7 +45,7 @@ Install :
 2. Compile third-party libraries (linux):
   1. Go to slic/build and type `cmake .; make` (you might have to create the build directory)
   2. Go to libDAI024/build and type `cmake ..; make`
-  3. ITK : Download version 3.20.1 from the web sitei and use `ccmake ..` to set review flag to ON. Then build
+  3. ITK : Download version 4.80.1 from the web sitei and use `ccmake ..` to set review flag to ON. Then build
 
 2. Compile third-party libraries (windows):
   1. Go to slic/build and type `cmake-gui ..` and then `MSBuild.exe supervoxel.sln /p:Configuratio=Release /m`
