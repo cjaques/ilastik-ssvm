@@ -41,13 +41,11 @@
 
 bool isDirectory(string path)
 {
-
   return isDirectory(path.c_str());
 }
 
 bool isDirectory(const char* path)
 {
-
   bool test = false;
   DIR* dir;
   dir = opendir(path);
