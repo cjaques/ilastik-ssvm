@@ -52,8 +52,6 @@ bool isDirectory(const char* path)
   DIR* dir;
   dir = opendir(path);
   if (dir) {
-    //TODO CHRIS - virer
-  printf("[utils]-isDirectory DEBUG - path : Is dir \n");
     test = true;
     closedir(dir);
   }
