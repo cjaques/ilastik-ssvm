@@ -41,18 +41,22 @@
 
 bool isDirectory(string path)
 {
+
   return isDirectory(path.c_str());
 }
 
 bool isDirectory(const char* path)
 {
+
   bool test = false;
   DIR* dir;
   dir = opendir(path);
   if (dir) {
+    //TODO CHRIS - virer
+  printf("[utils]-isDirectory DEBUG - path : Is dir \n");
     test = true;
+    closedir(dir);
   }
-  closedir(dir);
   return test;
 }
 
