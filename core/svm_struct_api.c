@@ -3237,12 +3237,14 @@ int         finalize_iteration(double ceps, int cached_constraint,
             sout << soutOutputDir.c_str();
             if(useSlice3d) {
               // add name of the cube
+              printf("DEBUG -- could be segfaulting here  \n" );
               sout << getNameFromPathWithoutExtension(sample.examples[sid].x.slice->getName());
               sout << "_";
               sout << iterationId;
             }
 
             if(useSlice3d) {
+              printf("DEBUG -- or here \n" );
               segmentImage(sample.examples[sid].x,
                            sout.str().c_str(),
                            sparm->giType,
@@ -3260,7 +3262,7 @@ int         finalize_iteration(double ceps, int cached_constraint,
                 sample.examples[sid].x.FNs[c] = 0;
                 sample.examples[sid].x.count[c] = 0;
               }
-
+              printf("DEBUG -- nay nei? \n" );
               Slice* slice = static_cast<Slice*>(sample.examples[sid].x.slice);
               computeScore(slice,
                            sample.examples[sid].x.feature,

@@ -569,6 +569,8 @@ double segmentImage(SPATTERN x,
                     const char* overlay_dir,
                     const int metric_type) {
   EnergyParam param(weight_file);
+  // TODO CHRIS - virer ca
+  printf("[inference] DEBUG - segment image called - 1\n");
   return segmentImage(x, output_file, algoType, param, labelToClassIdx,
                       output_roc_file, groundTruthLabels, lossPerLabel, compress_image,
                       overlay_dir, metric_type);
@@ -591,13 +593,23 @@ double segmentImage(SPATTERN x,
   map<sidType, nodeCoeffType>* _nodeCoeffs = x.nodeCoeffs;
   map<sidType, edgeCoeffType>* _edgeCoeffs = x.edgeCoeffs;
 
+  // TODO CHRIS - virer ca
+  printf("[inference] DEBUG - segment image called - 2\n");
+  printf("[inference] DEBUG - segment image called - Checking output file %s \n",output_file);
 
   bool output_is_dir = isDirectory(output_file);
+  printf("[inference] DEBUG - segment image called - Well, first ok , bool : %d \n",output_is_dir);
+  
   string output_dir = getDirectoryFromPath(output_file);
+    // TODO CHRIS - virer
+  printf("[inference] DEBUG - segment image called - first step, directory OK \n");
   double energy = 0;
+  
   labelType* nodeLabels = computeLabels(g, feature, param, algoType, 0,
                                         groundTruthLabels, lossPerLabel,
                                         _nodeCoeffs, _edgeCoeffs);
+    // TODO CHRIS - virer
+  printf("[inference] DEBUG - segment image called - first step, computeLabels OK \n");
 
   stringstream soutColoredImage;
   if(output_is_dir) {
@@ -618,25 +630,35 @@ double segmentImage(SPATTERN x,
     getColormapName(paramColormap);
     getLabelToClassMap(paramColormap.c_str(), *labelToClassIdx);
   }
-
+  // TODO CHRIS - virer
+  printf("[inference] DEBUG - segment image called - first step \n");
   // output image
   int nNodes = g->getNbSupernodes();
+  // TODO CHRIS - virer
+  printf("[inference] DEBUG - segment image called - first step, getNbSupernodes OK \n");
   g->exportSupernodeLabels(soutColoredImage.str().c_str(),
                            param.nClasses,
                            nodeLabels,
                            nNodes,
                            labelToClassIdx);
-
+  // TODO CHRIS - virer
+  printf("[inference] DEBUG - segment image called - first step, exportSupernodeLabels OK \n");
   map<labelType, ulong> labelCount;
   g->countSupernodeLabels(nodeLabels, labelCount);
+  // TODO CHRIS - virer
+  printf("[inference] DEBUG - segment image called - first step, countSupernodeLabels OK \n");
   for(map<labelType, ulong>::iterator it = labelCount.begin();
       it != labelCount.end(); ++it) {
     printf("%d=%ld ", it->first, it->second);
   }
   printf("\n");
-
+  // TODO CHRIS - virer  
+  printf("[inference] DEBUG - segment image called - second step OK\n");
   if(overlay_dir != 0) {
     mkdir(overlay_dir, 0777);
+    // TODO CHRIS - virer
+    printf("[inference] DEBUG - overlay_dir != 0 \n");
+  
     stringstream soutOverlayImage;
     if(output_is_dir) {
       soutOverlayImage << overlay_dir << "/" << getNameFromPathWithoutExtension(x.slice->getName()) << "_overlay";
@@ -654,7 +676,9 @@ double segmentImage(SPATTERN x,
       zipAndDeleteCube(soutOverlayImage.str().c_str());
     }
   }
-
+  // TODO CHRIS - virer
+  printf("[inference] DEBUG - segment image called - third step \n");
+  
   eSlicePType sliceType = g->getType();
   if(sliceType == SLICEP_SLICE3D) {
     if(!output_roc_file.empty()) {
@@ -672,7 +696,9 @@ double segmentImage(SPATTERN x,
         ulong total_neg = 0;
 
         const bool useColorAnnotations = false;
-
+        
+        // TODO CHRIS - virer
+        printf("[inference] DEBUG - segment image called - fourth step, metric_type = %d \n",metric_type);
         switch(metric_type) {
         case METRIC_SUPERNODE_BASED_01:
           compareMultiLabelVolumes(*slice3d,
@@ -714,6 +740,8 @@ double segmentImage(SPATTERN x,
           ofsRoc << SEPARATOR << "FPR" << SEPARATOR << "TNR" << SEPARATOR << "Accuracy" << endl;
         }
 
+        // TODO CHRIS - virer
+        printf("[inference] DEBUG - segment image called - fifth step \n");
         ofsRoc << soutColoredImage.str() << SEPARATOR;
         ofsRoc << true_pos << SEPARATOR << false_neg << SEPARATOR;
         ofsRoc << false_pos << SEPARATOR << true_neg << SEPARATOR;
@@ -733,13 +761,16 @@ double segmentImage(SPATTERN x,
         ofsRoc << SEPARATOR << accuracy << endl;
         ofsRoc.close();
       }
-
+      // TODO CHRIS - virer
+      printf("[inference] DEBUG - segment image called - sixth step \n");
       if(compress_image && g->getType() == SLICEP_SLICE3D) {
         zipAndDeleteCube(soutColoredImage.str().c_str());
       }
     }
   }
 
+  // TODO CHRIS - virer
+  printf("[inference] DEBUG - segment image called - return values from func. \n");
   delete[] nodeLabels;
   if(deleteLabelMap)
     delete labelToClassIdx;

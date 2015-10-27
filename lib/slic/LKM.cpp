@@ -598,6 +598,7 @@ void LKM::PerformLKMClustering(
 ///
 ///	Performs k mean segmentation. It is fast because it looks locally, not
 /// over the entire image.
+/// Implementation for color images (CIEL color space)
 //===========================================================================
 void LKM::PerformLKMVoxelClustering(
 	vector<double>&				kseedsl,
@@ -763,7 +764,8 @@ void LKM::PerformLKMVoxelClustering(
 ///	PerformLKMVoxelClustering
 ///
 ///	Performs k mean segmentation. It is fast because it looks locally, not
-/// over the entire image.
+/// over the entire image. 
+/// This implementation is for grayscale images.
 //===========================================================================
 void LKM::PerformLKMVoxelClustering(
 	vector<double>&				kseedsl,
@@ -801,7 +803,7 @@ void LKM::PerformLKMVoxelClustering(
 	//vector<double> distvec(sz, DBL_MAX);
 
 	//double invwt = 1.0/((STEP/20.0)*(STEP/20.0));
-        double invwt = 1.0/((STEP/cubeness)*(STEP/cubeness));
+    double invwt = 1.0/((STEP/cubeness)*(STEP/cubeness));
 
 	int x1, y1, x2, y2, z1, z2;
 	double l;
@@ -833,7 +835,7 @@ void LKM::PerformLKMVoxelClustering(
 				{
 					for( int x = x1; x < x2; x++ )
 					{
-						int i = y*m_width + x;
+						int i = y*m_width + x; // TODO CHris - remove ---- pourquoi instancier i ici et pas avant les loops?
 						//_ASSERT( y < m_height && x < m_width && y >= 0 && x >= 0 );
 
 						l = m_lvecvec[z][i];

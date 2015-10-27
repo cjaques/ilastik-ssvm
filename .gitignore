@@ -1,6 +1,8 @@
 # data directories #
 ####################
 testdata
+sampledata
+/lib/itk/
 
 # build directories #
 #####################

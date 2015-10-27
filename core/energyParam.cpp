@@ -137,6 +137,8 @@ void EnergyParam::load(const char* filename)
     ifsStats >> weights[i];
   }
 
+  // TODO CHRIS - virer
+  printf("[energyParam] DEBUG - loaded energyParam\n");
   ifsStats.close();
 }
 

@@ -70,6 +70,8 @@ void train(char* config)
   clock_t time_0 = clock();
   
   /* Do the learning and return structmodel. */
+  printf("[Main] - Algorithm type : %d\n",struct_parm.alg_type);
+  
   if(struct_parm.alg_type == 0)
     svm_learn_struct(sample,&struct_parm,&learn_parm,&kernel_parm,&structmodel,NSLACK_ALG);
   else if(struct_parm.alg_type == 1)
@@ -80,7 +82,7 @@ void train(char* config)
     svm_learn_struct_joint(sample,&struct_parm,&learn_parm,&kernel_parm,&structmodel,ONESLACK_DUAL_ALG);
   else if(struct_parm.alg_type == 4)
     svm_learn_struct_joint(sample,&struct_parm,&learn_parm,&kernel_parm,&structmodel,ONESLACK_DUAL_CACHE_ALG);
-  else if(struct_parm.alg_type == 9)
+  else if(struct_parm.alg_type == 9) // this is the default algorithm type
     svm_learn_struct_joint_custom(sample,&struct_parm,&learn_parm,&kernel_parm,&structmodel);
   else
     exit(EXIT_FAILURE);

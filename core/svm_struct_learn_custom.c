@@ -715,6 +715,8 @@ double do_gradient_step(STRUCT_LEARN_PARM *sparm,
     printf("[svm_struct_custom] Thread %d/%d\n", threadId,omp_get_num_threads());
 #endif
 #endif
+    // TODO CHris -> probably segfault after here.
+    printf("[svm_struct_custom] - Iteration Num %d when precomputing ...\n",i);
 
     if(sparm->loss_type == SLACK_RESCALING) {
       y_bar[i] = find_most_violated_constraint_slackrescaling(ex[i].x, ex[i].y,
@@ -747,7 +749,9 @@ double do_gradient_step(STRUCT_LEARN_PARM *sparm,
 #else
       int threadId = 0;
 #endif
-
+      // TODO CHris -> probably segfault after here.
+      printf("[svm_struct_custom] - Iteration Num %d when computing ...\n",il);
+   
       // check if labels are stored in the cache
       int cacheId = nExamples + ex[il].x.id;
       bool labelFound = LabelCache::Instance()->getLabel(cacheId, *y_direct);
